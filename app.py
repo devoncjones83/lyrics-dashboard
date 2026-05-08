@@ -1,3 +1,6 @@
+from startup import validate_system
+
+validate_system()
 import os
 
 from flask import Flask, render_template, jsonify
