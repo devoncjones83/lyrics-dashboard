@@ -1,0 +1,70 @@
+const socket = io();
+
+let jobs = [];
+let errors = [];
+
+socket.on("update", (data) => {
+
+    jobs = data.jobs;
+    errors = data.errors;
+
+    render();
+});
+
+async function refreshJobs() {
+
+    await fetch("/refresh");
+}
+
+function render() {
+
+    const filter = document.getElementById("filter").value;
+
+    const container = document.getElementById("container");
+
+    const stats = document.getElementById("stats");
+
+    let filtered = jobs;
+
+    if (filter !== "all") {
+        filtered = jobs.filter(j => j.status === filter);
+    }
+
+    stats.innerHTML = `
+        <div class="stat">
+            Total: ${jobs.length}
+        </div>
+
+        <div class="stat">
+            Completed: ${jobs.filter(j => j.status === "done").length}
+        </div>
+
+        <div class="stat">
+            Errors: ${jobs.filter(j => j.status === "error").length}
+        </div>
+    `;
+
+    container.innerHTML = filtered.map(j => `
+
+        <div class="card ${j.status}">
+
+            <div class="song">
+                ${j.title}
+            </div>
+
+            <div class="artist">
+                ${j.artist}
+            </div>
+
+            <div class="album">
+                ${j.album}
+            </div>
+
+            <div class="status">
+                ${j.status}
+            </div>
+
+        </div>
+
+    `).join("");
+}

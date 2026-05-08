@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lyrics Dashboard</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <div class="title">
+            Lyrics Dashboard
+        </div>
+
+        <div class="controls">
+
+            <button onclick="refreshJobs()">
+                Refresh
+            </button>
+
+            <select id="filter" onchange="render()">
+
+                <option value="all">
+                    All
+                </option>
+
+                <option value="done">
+                    Completed
+                </option>
+
+                <option value="pending">
+                    Pending
+                </option>
+
+                <option value="processing">
+                    Processing
+                </option>
+
+                <option value="missing">
+                    Missing Lyrics
+                </option>
+
+                <option value="error">
+                    Errors
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <div id="stats"></div>
+
+    <div id="container"></div>
+
+    <!-- Socket.IO v4 client -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <!-- Main dashboard logic -->
+    <script src="/static/app.js"></script>
+
+</body>
+
+</html></div>
+
+</div>
+
+<div id="stats"></div>
+
+<div id="container"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/static/app.js"></script>
+
+</body>
+</html>
+</script>

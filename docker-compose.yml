@@ -1,0 +1,18 @@
+services:
+
+  lyrics-dashboard:
+
+    build: .
+
+    container_name: lyrics-dashboard
+
+    ports:
+      - "5001:5001"
+
+    environment:
+      - MUSIC_DIR=/music
+
+    volumes:
+      - /mnt/user/media/Music:/music
+
+    restart: unless-stopped
