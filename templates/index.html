@@ -1,56 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta charset="UTF-8" />
     <title>Lyrics Dashboard</title>
 
-    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #dbeafe;
+            color: #111;
+        }
+
+        header {
+            background: #bfdbfe;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #60a5fa;
+            color: white;
+        }
+
+        button:hover {
+            background: #3b82f6;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .panel {
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 10px;
+            height: 80vh;
+            overflow-y: auto;
+        }
+
+        .job {
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            background: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .job.done { background: #bbf7d0; }
+        .job.error { background: #fecaca; }
+        .job.processing { background: #fde68a; }
+
+        .log {
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+
+        .filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div class="header">
+<header>
+    <h1>🎵 Lyrics Dashboard</h1>
 
-        <div class="title">
-            Lyrics Dashboard
-        </div>
+    <div class="controls">
+        <button onclick="refresh()">Refresh</button>
 
-        <div class="controls">
+        <label class="filter">
+            <input type="checkbox" id="errorOnly" />
+            Errors only
+        </label>
+    </div>
+</header>
 
-            <button onclick="refreshJobs()">
-                Refresh
-            </button>
+<div class="container">
 
-            <select id="filter" onchange="render()">
+    <div class="panel" id="jobs">
+        <h3>Jobs</h3>
+    </div>
 
-                <option value="all">
-                    All
-                </option>
+    <div class="panel">
+        <h3>Activity Log</h3>
+        <div class="log" id="log"></div>
+    </div>
 
-                <option value="done">
-                    Completed
-                </option>
+</div>
 
-                <option value="pending">
-                    Pending
-                </option>
+<script>
+    const socket = io({
+        transports: ["websocket", "polling"]
+    });
 
-                <option value="processing">
-                    Processing
-                </option>
+    let state = { jobs: [] };
 
-                <option value="missing">
-                    Missing Lyrics
-                </option>
+    socket.on("connect", () => {
+        log("Socket connected");
+    });
 
-                <option value="error">
-                    Errors
+    socket.on("disconnect", () => {
+        log("Socket disconnected");
+    });
+
+    socket.on("update", (data) => {
+        state = data;
+        render();
+    });
+
+    function render() {
+        const container = document.getElementById("jobs");
+        const errorOnly = document.getElementById("errorOnly").checked;
+
+        container.innerHTML = "<h3>Jobs</h3>";
+
+        (state.jobs || []).forEach(job => {
+
+            if (errorOnly && job.status !== "error") return;
+
+            const div = document.createElement("div");
+            div.className = "job " + (job.status || "");
+
+            div.innerHTML = `
+                <b>${job.title || "Unknown"}</b><br/>
+                ${job.artist || ""}<br/>
+                Status: ${job.status || "pending"}
+            `;
+
+            container.appendChild(div);
+        });
+    }
+
+    function refresh() {
+        socket.emit("refresh");
+        log("Manual refresh triggered");
+    }
+
+    function log(msg) {
+        const logBox = document.getElementById("log");
+        const time = new Date().toLocaleTimeString();
+        logBox.innerText += `[${time}] ${msg}\n`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    document.getElementById("errorOnly").addEventListener("change", render);
+</script>
+
+</body>
+</html>
                 </option>
 
             </select>
